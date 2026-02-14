@@ -31,7 +31,7 @@
     "mongodb": "^6.15.0",
     "motion": "^12.5.0",
     "multer": "^2.0.1",
-    "next": "15.2.3",
+    "next": "15.2.8",
     "next-connect": "^1.0.0",
     "react": "^18.2.0",
     "react-card-flip": "^1.2.3",
