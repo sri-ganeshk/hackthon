@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.43",
+    "@ai-sdk/react": "^1.2.12",
     "@clerk/nextjs": "^6.12.9",
     "@google-cloud/text-to-speech": "^6.4.0",
     "@google/generative-ai": "^0.24.0",

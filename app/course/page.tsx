@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 
@@ -18,27 +18,28 @@ const courseTypes = [
 const difficultyLevels = ["Beginner", "Intermediate", "Advanced", "Expert"];
 
 export default function UploadPage() {
-  const { isSignedIn, user } = useUser();
+  const { user } = useUser();
   const [msg, setMsg] = useState("");
   const [courseType, setCourseType] = useState("");
   const [difficultyLevel, setDifficultyLevel] = useState("");
-  const [pdfFiles, setPdfFiles] = useState([]);
-  const [selectedFileNames, setSelectedFileNames] = useState([]);
+  const [pdfFiles, setPdfFiles] = useState<FileList | null>(null);
+  const [selectedFileNames, setSelectedFileNames] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
-  const [result, setResult] = useState(null);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
-  const handleFileChange = (e) => {
-    setPdfFiles(e.target.files);
-    const fileNames = Array.from(e.target.files).map((file) => file.name);
-    setSelectedFileNames(fileNames);
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    setPdfFiles(files);
+    if (files) {
+      const fileNames = Array.from(files).map((file) => file.name);
+      setSelectedFileNames(fileNames);
+    }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
-    setResult(null);
     setLoading(true);
 
     const formData = new FormData();
@@ -46,10 +47,12 @@ export default function UploadPage() {
     formData.append("courseType", courseType);
     formData.append("difficultyLevel", difficultyLevel);
     formData.append("userName", "your-username");
-    formData.append("email", user.emailAddresses[0].emailAddress);
+    formData.append("email", user?.emailAddresses[0]?.emailAddress ?? "");
 
-    for (let i = 0; i < pdfFiles.length; i++) {
-      formData.append("pdfFiles", pdfFiles[i]);
+    if (pdfFiles) {
+      for (let i = 0; i < pdfFiles.length; i++) {
+        formData.append("pdfFiles", pdfFiles[i]);
+      }
     }
 
     try {
@@ -62,11 +65,9 @@ export default function UploadPage() {
       if (!response.ok) {
         throw new Error(data.error || "Something went wrong");
       }
-      setResult(data);
-      router.push(`/course/${data.insertedId}`);
-    } catch (err) {
-      console.error("Error submitting form:", err);
-      setError(err.message);
+      router.push(`/course/${data.data.insertedId}`);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
     setLoading(false);
   };

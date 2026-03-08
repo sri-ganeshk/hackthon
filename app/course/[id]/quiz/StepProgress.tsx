@@ -1,18 +1,21 @@
 import React from "react";
 
-function StepProgress({ data, stepCount, answersStatus, setStepCount }) {
+interface StepProgressProps {
+  data: unknown[];
+  stepCount: number;
+  answersStatus: boolean[];
+  setStepCount: (index: number) => void;
+}
+
+function StepProgress({ data, stepCount, answersStatus, setStepCount }: StepProgressProps) {
   return (
     <div className="flex flex-wrap items-center justify-center gap-2 mb-6">
       {data.map((_, index) => {
-        // Default gray for unanswered
         let bgColor = "bg-gray-400";
 
-        // If the user has answered this question, color it green or red
         if (index < answersStatus.length) {
           bgColor = answersStatus[index] ? "bg-green-500" : "bg-red-500";
-        }
-        // If it's the current question and not answered yet
-        else if (index === stepCount) {
+        } else if (index === stepCount) {
           bgColor = "bg-blue-500";
         }
 

@@ -1,25 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import QuizCardItem from "./QuizCardItem";
 import StepProgress from "./StepProgress";
 
+interface QuizQuestion {
+  question: string;
+  options: string[];
+  correctAnswer: string;
+}
+
 export default function QuizKingDisplay() {
   const { id } = useParams();
-  const [quizQuestions, setQuizQuestions] = useState([]);
+  const [quizQuestions, setQuizQuestions] = useState<QuizQuestion[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
-  // UI states for quiz interaction
   const [stepCount, setStepCount] = useState(0);
-  const [isCorrectAnswer, setIsCorrectAnswer] = useState(null);
+  const [isCorrectAnswer, setIsCorrectAnswer] = useState<boolean | null>(null);
   const [correctAnswer, setCorrectAnswer] = useState("");
   const [score, setScore] = useState(0);
-  const [answersStatus, setAnswersStatus] = useState([]); // track correctness of each question
-  const [disableOptions, setDisableOptions] = useState(false); // disable once user selects an option
+  const [answersStatus, setAnswersStatus] = useState<boolean[]>([]);
+  const [disableOptions, setDisableOptions] = useState(false);
 
-  // Fetch quiz questions from backend API endpoint
   useEffect(() => {
     async function fetchQuizQuestions() {
       try {
@@ -28,9 +32,9 @@ export default function QuizKingDisplay() {
           throw new Error("Failed to fetch quiz questions");
         }
         const data = await response.json();
-        setQuizQuestions(data.quizQuestions);
-      } catch (err) {
-        setError(err.message);
+        setQuizQuestions(data.data.quizQuestions);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -38,8 +42,7 @@ export default function QuizKingDisplay() {
     fetchQuizQuestions();
   }, [id]);
 
-  // Check the user's selected answer
-  const checkAnswer = (selectedOption, currentQuiz) => {
+  const checkAnswer = (selectedOption: string, currentQuiz: QuizQuestion) => {
     if (disableOptions) return;
     setDisableOptions(true);
 
@@ -54,7 +57,6 @@ export default function QuizKingDisplay() {
 
     setAnswersStatus((prev) => [...prev, answerIsCorrect]);
 
-    // Move to the next question after 3 seconds
     setTimeout(() => {
       if (stepCount < quizQuestions.length - 1) {
         setStepCount((prevStep) => prevStep + 1);
@@ -87,12 +89,11 @@ export default function QuizKingDisplay() {
 
       {!loading && quizQuestions.length > 0 ? (
         <>
-          {/* Step Progress Component */}
           <StepProgress
             data={quizQuestions}
             stepCount={stepCount}
             answersStatus={answersStatus}
-            setStepCount={(value) => {
+            setStepCount={(value: number) => {
               if (!disableOptions) {
                 setStepCount(value);
                 setIsCorrectAnswer(null);
@@ -100,18 +101,16 @@ export default function QuizKingDisplay() {
             }}
           />
 
-          {/* Quiz Card Container */}
           <div className="max-w-xl mx-auto w-full bg-black border border-white rounded-lg p-6 mt-6">
             <QuizCardItem
               quiz={quizQuestions[stepCount]}
               disableOptions={disableOptions}
-              userSelectedOption={(v) =>
+              userSelectedOption={(v: string) =>
                 checkAnswer(v, quizQuestions[stepCount])
               }
             />
           </div>
 
-          {/* Feedback */}
           {isCorrectAnswer === false && (
             <div className="max-w-xl mx-auto w-full border border-red-600 bg-red-200 rounded-lg mt-6 p-4 text-center">
               <h2 className="font-bold text-lg text-red-600">Incorrect</h2>
@@ -128,7 +127,6 @@ export default function QuizKingDisplay() {
             </div>
           )}
 
-          {/* Score Display (shown at last question) */}
           {stepCount === quizQuestions.length - 1 && (
             <div className="flex flex-col items-center mt-8">
               <div className="text-white mb-4">

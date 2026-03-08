@@ -1,22 +1,25 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm"; // Supports Markdown formatting
+import remarkGfm from "remark-gfm";
+
+interface QAItem {
+  question: string;
+  answer: string;
+}
 
 export default function DescriptiveQA() {
   const { id } = useParams();
-  const [descriptiveQA, setDescriptiveQA] = useState([]);
+  const [descriptiveQA, setDescriptiveQA] = useState<QAItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   const goToCoursePage = () => {
-    // Navigate to course page (adjust the URL as needed)
     window.location.href = `/course/${id}`;
   };
 
-  // Fetch descriptive Q&A from backend API endpoint
   useEffect(() => {
     async function fetchDescriptiveQA() {
       try {
@@ -25,9 +28,9 @@ export default function DescriptiveQA() {
           throw new Error("Failed to fetch descriptive Q&A data");
         }
         const data = await response.json();
-        setDescriptiveQA(data.descriptiveQA);
-      } catch (err) {
-        setError(err.message);
+        setDescriptiveQA(data.data.descriptiveQA);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }

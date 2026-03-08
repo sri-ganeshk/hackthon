@@ -1,7 +1,17 @@
 import React, { useState } from "react";
 
-function QuizCardItem({ quiz, userSelectedOption, disableOptions }) {
-  const [selectedOption, setSelectedOption] = useState(null);
+interface QuizCardItemProps {
+  quiz: {
+    question: string;
+    options: string[];
+    correctAnswer: string;
+  };
+  userSelectedOption: (option: string) => void;
+  disableOptions: boolean;
+}
+
+function QuizCardItem({ quiz, userSelectedOption, disableOptions }: QuizCardItemProps) {
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
   return (
     <div>
@@ -16,7 +26,6 @@ function QuizCardItem({ quiz, userSelectedOption, disableOptions }) {
           <div
             key={index}
             onClick={() => {
-              // If already disabled, do nothing
               if (disableOptions) return;
 
               setSelectedOption(option);
@@ -25,15 +34,13 @@ function QuizCardItem({ quiz, userSelectedOption, disableOptions }) {
             className={`flex items-center justify-center p-4 min-h-[60px] rounded-md transition-colors
               ${
                 disableOptions
-                  ? "cursor-not-allowed" // No pointer if disabled
+                  ? "cursor-not-allowed"
                   : "cursor-pointer"
               }
               ${
                 selectedOption === option
-                  ? // Selected style
-                    "bg-blue-500 text-white border border-blue-500"
-                  : // Unselected style
-                    "bg-black text-white border border-white hover:bg-white hover:text-black"
+                  ? "bg-blue-500 text-white border border-blue-500"
+                  : "bg-black text-white border border-white hover:bg-white hover:text-black"
               }`}
           >
             <span className="text-center text-sm sm:text-base">{option}</span>

@@ -1,15 +1,24 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import React from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useParams } from "next/navigation";
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+interface Flashcard {
+  front: string;
+  back: string;
+}
+
+interface FlashData {
+  course: unknown;
+  flashcards: Flashcard[];
+}
+
 export default function FlashcardsDisplay() {
   const { id } = useParams();
-  const [data, setData] = useState(null);
+  const [data, setData] = useState<FlashData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isFlipped, setIsFlipped] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -18,7 +27,6 @@ export default function FlashcardsDisplay() {
     window.location.href = `/course/${id}`;
   };
 
-  // Fetch both course data and flashcards from backend
   useEffect(() => {
     async function fetchData() {
       try {
@@ -27,9 +35,9 @@ export default function FlashcardsDisplay() {
           throw new Error("Failed to fetch course data");
         }
         const json = await res.json();
-        setData(json);
-      } catch (err) {
-        setError(err.message);
+        setData(json.data);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -37,37 +45,35 @@ export default function FlashcardsDisplay() {
     fetchData();
   }, [id]);
 
-  // Handlers for navigating flashcards
-  const goToPrevious = () => {
+  const goToPrevious = useCallback(() => {
     if (isAnimating || !data?.flashcards?.length) return;
     setIsAnimating(true);
     setCurrentIndex((prev) => (prev === 0 ? data.flashcards.length - 1 : prev - 1));
     setIsFlipped(false);
     setTimeout(() => setIsAnimating(false), 500);
-  };
+  }, [isAnimating, data]);
 
-  const goToNext = () => {
+  const goToNext = useCallback(() => {
     if (isAnimating || !data?.flashcards?.length) return;
     setIsAnimating(true);
     setCurrentIndex((prev) => (prev === data.flashcards.length - 1 ? 0 : prev + 1));
     setIsFlipped(false);
     setTimeout(() => setIsAnimating(false), 500);
-  };
-
-  const handleKeyPress = (e) => {
-    if (e.key === 'ArrowLeft') goToPrevious();
-    if (e.key === 'ArrowRight') goToNext();
-  };
+  }, [isAnimating, data]);
 
   useEffect(() => {
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') goToPrevious();
+      if (e.key === 'ArrowRight') goToNext();
+    };
     document.addEventListener('keydown', handleKeyPress);
     return () => document.removeEventListener('keydown', handleKeyPress);
-  }, [data, isAnimating]);
+  }, [goToPrevious, goToNext]);
 
   if (loading) return <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 sm:p-6 md:p-8 text-centre text-xl ">Genrating the FlahCards...</div>;
   if (error) return <p>Error: {error}</p>;
 
-  const flashcards = data.flashcards;
+  const flashcards = data?.flashcards ?? [];
 
   return (
     <div className="min-h-screen bg-black flex flex-col items-center justify-center p-4 sm:p-6 md:p-8">
@@ -75,7 +81,7 @@ export default function FlashcardsDisplay() {
         <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-center text-white mb-8 animate-[float_4s_ease-in-out_infinite]">
           Flashcards
         </h1>
-        {flashcards && flashcards.length > 0 ? (
+        {flashcards.length > 0 ? (
           <>
             <div className="flex items-center justify-between gap-2 sm:gap-4 md:gap-6">
               <button

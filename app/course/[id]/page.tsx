@@ -5,11 +5,27 @@ import StudyMaterial from "../../components/study-material";
 import React, { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 
+interface CourseOutline {
+  courseTitle: string;
+  courseSummary: string;
+  chapters: Array<{
+    chapterTitle: string;
+    chapterSummary: string;
+    topics: string[];
+  }>;
+}
+
+interface CourseData {
+  _id: string;
+  outline: CourseOutline;
+}
+
 export default function Course() {
-  const { id } = useParams();
-  const [courseData, setCourseData] = useState(null);
+  const params = useParams();
+  const id = params.id as string;
+  const [courseData, setCourseData] = useState<CourseData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchCourseData() {
@@ -18,11 +34,10 @@ export default function Course() {
         if (!response.ok) {
           throw new Error('Failed to fetch course data');
         }
-        const data = await response.json();
-        setCourseData(data);
-        console.log("Course Data:", data);
-      } catch (err) {
-        setError(err.message);
+        const json = await response.json();
+        setCourseData(json.data);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : 'Unknown error');
       } finally {
         setLoading(false);
       }

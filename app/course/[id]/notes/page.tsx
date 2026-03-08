@@ -1,17 +1,31 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
+
+interface Page {
+  title: string;
+  content: string;
+}
+
+interface Article {
+  topic: string;
+  pages: Page[];
+}
+
+interface Chapter {
+  chapter: string;
+  articles: Article[];
+}
 
 export default function GeminiChaptersByTopicRaw() {
   const { id } = useParams();
-  const [chapterResponses, setChapterResponses] = useState([]);
+  const [chapterResponses, setChapterResponses] = useState<Chapter[]>([]);
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
   const [currentTopicIndex, setCurrentTopicIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch note data from API route
   useEffect(() => {
     async function fetchNoteData() {
       try {
@@ -20,10 +34,9 @@ export default function GeminiChaptersByTopicRaw() {
           throw new Error("Failed to fetch note data");
         }
         const data = await response.json();
-        // The API returns an object with a "note" key containing chapters
-        setChapterResponses(data.note.chapters);
-      } catch (err) {
-        setError(err.message);
+        setChapterResponses(data.data.note.chapters);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
@@ -33,12 +46,10 @@ export default function GeminiChaptersByTopicRaw() {
     }
   }, [id]);
 
-  // Reset topic index when chapter changes
   useEffect(() => {
     setCurrentTopicIndex(0);
   }, [currentChapterIndex]);
 
-  // Navigation Handlers
   const handleTopicNext = () => {
     const currentArticles = chapterResponses[currentChapterIndex].articles;
     if (currentTopicIndex < currentArticles.length - 1) {
@@ -59,7 +70,7 @@ export default function GeminiChaptersByTopicRaw() {
     }
   };
 
-  const handleChapterSelect = (index) => {
+  const handleChapterSelect = (index: number) => {
     setCurrentChapterIndex(index);
     setCurrentTopicIndex(0);
   };

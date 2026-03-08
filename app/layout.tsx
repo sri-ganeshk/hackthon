@@ -6,6 +6,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import React from 'react'
 import Appbar from './components/navbar'
+import ChatPanel from '@/components/ai-assistant/ChatPanel'
 const geistSans = Geist({
   variable: '--font-geist-sans',
   subsets: ['latin'],
@@ -40,6 +41,7 @@ export default function RootLayout({
            <Appbar/>
           
           {children} 
+          <ChatPanel />
         </body>
       </html>
     </ClerkProvider>

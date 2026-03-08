@@ -4,35 +4,44 @@ import { useUser, SignInButton } from "@clerk/nextjs";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 
+interface CourseOutline {
+  courseTitle: string;
+  courseSummary: string;
+}
+
+interface CourseItem {
+  _id: string;
+  outline: CourseOutline;
+}
+
 export default function Dashboard() {
   const { isSignedIn, user } = useUser();
-  const [courses, setCourses] = useState([]);
+  const [courses, setCourses] = useState<CourseItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchCourses() {
       try {
         const response = await fetch(
-          `/api/courses?email=${user.emailAddresses[0].emailAddress}`
+          `/api/courses?email=${user?.emailAddresses[0]?.emailAddress}`
         );
         if (!response.ok) {
           throw new Error("Failed to fetch courses");
         }
         const data = await response.json();
-        setCourses(data);
-      } catch (err) {
-        setError(err.message);
+        setCourses(data.data);
+      } catch (err: unknown) {
+        setError(err instanceof Error ? err.message : "Unknown error");
       } finally {
         setLoading(false);
       }
     }
 
-    // Only fetch courses if the user is signed in
     if (isSignedIn) {
       fetchCourses();
     }
-  }, [isSignedIn, user?.email]);
+  }, [isSignedIn, user?.emailAddresses]);
 
   if (!isSignedIn) {
     return (
@@ -56,7 +65,6 @@ export default function Dashboard() {
   }
 
   if (error) {
-    console.log("Error fetching courses:", error);
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p>Try Again...</p>
@@ -64,15 +72,11 @@ export default function Dashboard() {
     );
   }
 
-  // Helper function to truncate the course summary to 4 or 5 words
   const truncateSummary = (summary = "", wordLimit = 5) => {
-    // Split on whitespace
     const words = summary.trim().split(/\s+/);
-    // If we have more than `wordLimit` words, slice and add ellipsis
     if (words.length > wordLimit) {
       return words.slice(0, wordLimit).join(" ") + "...";
     }
-    // Otherwise, return the original summary
     return summary;
   };
 
@@ -84,13 +88,12 @@ export default function Dashboard() {
           Hello, {user?.fullName}
         </h1>
         <p className="text-base md:text-lg mt-2">
-          Welcome back, it's time to get back and start learning a new course.
+          Welcome back, it&apos;s time to get back and start learning a new course.
         </p>
       </div>
 
       {/* Courses Section */}
       <div className="mt-10 w-full max-w-4xl">
-        {/* Same-line heading and button (with responsive text) */}
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-2xl md:text-3xl font-semibold">Your Courses</h2>
           <Link href="/course">
@@ -103,7 +106,6 @@ export default function Dashboard() {
 
         <div className="space-y-6">
           {courses.map((course) => {
-            // Truncate the summary to 5 words
             const truncated = truncateSummary(course.outline.courseSummary, 5);
 
             return (
@@ -111,7 +113,6 @@ export default function Dashboard() {
                 key={course._id}
                 className="p-6 rounded-lg shadow-md border border-transparent hover:border-slate-700 transition"
               >
-                {/* Title, truncated summary, and View button in the same container */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                   <div>
                     <h3 className="text-xl font-semibold">
