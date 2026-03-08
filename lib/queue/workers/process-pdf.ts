@@ -6,6 +6,11 @@ import Resource from '@/models/Resource';
 import { logger } from '@/lib/logger';
 import type { PdfJobInput } from '@/types/ai';
 import type { TaskType } from '@google/generative-ai';
+import * as pdfParseModule from 'pdf-parse';
+
+const pdfParse = pdfParseModule as unknown as (
+  buffer: Buffer,
+) => Promise<{ text: string; numpages: number }>;
 
 const connection = process.env.REDIS_URL
   ? { url: process.env.REDIS_URL }
@@ -39,10 +44,6 @@ export const pdfWorker = new Worker(
       const pdfResponse = await fetch(url);
       const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
 
-      // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const pdfParse = require('pdf-parse') as (
-        buffer: Buffer,
-      ) => Promise<{ text: string; numpages: number }>;
       const pdfData = await pdfParse(pdfBuffer);
       const fullText = pdfData.text;
 

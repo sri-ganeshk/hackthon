@@ -30,6 +30,8 @@ ${sourceText}`;
 
     const script = result.response.text();
 
+    // Google Cloud TTS API has a 5000 byte limit per request for plain text input.
+    // Scripts exceeding this are truncated to stay within the API constraint.
     const MAX_TTS_SCRIPT_LENGTH = 5000;
     let audioUrl = '';
     try {
