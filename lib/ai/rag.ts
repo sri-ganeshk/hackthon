@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { generateEmbedding } from '@/lib/ai/embeddings';
 import { connectDB } from '@/lib/db/mongodb';
 import DocumentChunk from '@/models/DocumentChunk';
@@ -25,7 +26,7 @@ export async function retrieveRelevantChunks(
         queryVector: queryEmbedding,
         numCandidates: topK * 10,
         limit: topK,
-        filter: { resourceId },
+        filter: { resourceId: new mongoose.Types.ObjectId(resourceId) },
       },
     },
     {

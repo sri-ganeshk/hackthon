@@ -30,6 +30,7 @@ ${sourceText}`;
 
     const script = result.response.text();
 
+    const MAX_TTS_SCRIPT_LENGTH = 5000;
     let audioUrl = '';
     try {
       const ttsApiKey = process.env.GOOGLE_CLOUD_TTS_KEY;
@@ -40,7 +41,7 @@ ${sourceText}`;
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              input: { text: script.substring(0, 5000) },
+              input: { text: script.substring(0, MAX_TTS_SCRIPT_LENGTH) },
               voice: { languageCode: 'en-US', name: 'en-US-Casual-K' },
               audioConfig: { audioEncoding: 'MP3' },
             }),
