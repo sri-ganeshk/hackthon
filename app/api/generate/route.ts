@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { GenerateRequestSchema } from '@/types/api';
-import { chapterQueue, flashcardQueue, audioQueue } from '@/lib/queue/index';
+import { getChapterQueue, getFlashcardQueue, getAudioQueue } from '@/lib/queue/index';
 import { logger } from '@/lib/logger';
 
 /** POST /api/generate - Enqueue AI generation jobs */
@@ -25,17 +25,17 @@ export async function POST(req: NextRequest) {
       const jobData = { userId, sourceText, topic };
       switch (type) {
         case 'chapter': {
-          const job = await chapterQueue.add('generate-notebook-chapter', jobData);
+          const job = await getChapterQueue().add('generate-notebook-chapter', jobData);
           jobIds.chapter = job.id ?? '';
           break;
         }
         case 'flashcards': {
-          const job = await flashcardQueue.add('generate-flashcards', jobData);
+          const job = await getFlashcardQueue().add('generate-flashcards', jobData);
           jobIds.flashcards = job.id ?? '';
           break;
         }
         case 'audio': {
-          const job = await audioQueue.add('generate-audio-overview', jobData);
+          const job = await getAudioQueue().add('generate-audio-overview', jobData);
           jobIds.audio = job.id ?? '';
           break;
         }

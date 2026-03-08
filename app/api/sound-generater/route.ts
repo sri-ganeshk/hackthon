@@ -10,11 +10,11 @@ export const config = {
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const msg = formData.get('msg') as string | null;
+    const _msg = formData.get('msg') as string | null;
     const pdfFiles = formData.getAll('pdfFiles');
-    const courseType = formData.get('courseType') as string | null;
-    const difficultyLevel = formData.get('difficultyLevel') as string | null;
-    const userName = formData.get('userName') as string | null;
+    const _courseType = formData.get('courseType') as string | null;
+    const _difficultyLevel = formData.get('difficultyLevel') as string | null;
+    const _userName = formData.get('userName') as string | null;
 
     const supabase = getSupabaseStorage();
 
@@ -32,9 +32,7 @@ export async function POST(req: NextRequest) {
         throw new Error('Error uploading file to Supabase');
       }
 
-      const { data: urlData } = supabase.storage
-        .from('pdfs')
-        .getPublicUrl(fileName);
+      const { data: urlData } = supabase.storage.from('pdfs').getPublicUrl(fileName);
 
       return { publicURL: urlData?.publicUrl, fileName };
     };

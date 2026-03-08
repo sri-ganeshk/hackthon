@@ -1,28 +1,42 @@
 import { Queue } from 'bullmq';
-import { logger } from '@/lib/logger';
 
-const connection = process.env.REDIS_URL
-  ? { url: process.env.REDIS_URL }
-  : { host: '127.0.0.1', port: 6379 };
+function getConnection() {
+  return process.env.REDIS_URL ? { url: process.env.REDIS_URL } : { host: '127.0.0.1', port: 6379 };
+}
+
+let _chapterQueue: Queue | null = null;
+let _flashcardQueue: Queue | null = null;
+let _audioQueue: Queue | null = null;
+let _pdfQueue: Queue | null = null;
 
 /** BullMQ queue for chapter generation jobs */
-export const chapterQueue = new Queue('generate-notebook-chapter', {
-  connection,
-});
+export function getChapterQueue(): Queue {
+  if (!_chapterQueue) {
+    _chapterQueue = new Queue('generate-notebook-chapter', { connection: getConnection() });
+  }
+  return _chapterQueue;
+}
 
 /** BullMQ queue for flashcard generation jobs */
-export const flashcardQueue = new Queue('generate-flashcards', {
-  connection,
-});
+export function getFlashcardQueue(): Queue {
+  if (!_flashcardQueue) {
+    _flashcardQueue = new Queue('generate-flashcards', { connection: getConnection() });
+  }
+  return _flashcardQueue;
+}
 
 /** BullMQ queue for audio overview generation jobs */
-export const audioQueue = new Queue('generate-audio-overview', {
-  connection,
-});
+export function getAudioQueue(): Queue {
+  if (!_audioQueue) {
+    _audioQueue = new Queue('generate-audio-overview', { connection: getConnection() });
+  }
+  return _audioQueue;
+}
 
 /** BullMQ queue for PDF processing jobs */
-export const pdfQueue = new Queue('process-pdf-for-rag', {
-  connection,
-});
-
-logger.info('BullMQ queues initialized');
+export function getPdfQueue(): Queue {
+  if (!_pdfQueue) {
+    _pdfQueue = new Queue('process-pdf-for-rag', { connection: getConnection() });
+  }
+  return _pdfQueue;
+}

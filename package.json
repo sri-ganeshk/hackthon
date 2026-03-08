@@ -4,10 +4,21 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "postinstall": "prisma generate",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "@ai-sdk/google": "^3.0.43",
@@ -15,10 +26,6 @@
     "@clerk/nextjs": "^6.12.9",
     "@google-cloud/text-to-speech": "^6.4.0",
     "@google/generative-ai": "^0.24.0",
-    "@heroui/input": "^2.4.16",
-    "@heroui/system": "^2.4.12",
-    "@heroui/theme": "^2.4.12",
-    "@prisma/client": "^6.5.0",
     "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-slot": "^1.1.2",
     "@supabase/supabase-js": "^2.49.1",
@@ -72,7 +79,6 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.3.2",
     "prettier": "^3.8.1",
-    "prisma": "^6.5.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

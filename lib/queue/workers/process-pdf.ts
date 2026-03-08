@@ -39,7 +39,10 @@ export const pdfWorker = new Worker(
       const pdfResponse = await fetch(url);
       const pdfBuffer = Buffer.from(await pdfResponse.arrayBuffer());
 
-      const pdfParse = (await import('pdf-parse')).default;
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const pdfParse = require('pdf-parse') as (
+        buffer: Buffer,
+      ) => Promise<{ text: string; numpages: number }>;
       const pdfData = await pdfParse(pdfBuffer);
       const fullText = pdfData.text;
 
@@ -50,10 +53,7 @@ export const pdfWorker = new Worker(
       }
 
       for (let i = 0; i < chunks.length; i++) {
-        const embedding = await generateEmbedding(
-          chunks[i],
-          'RETRIEVAL_DOCUMENT' as TaskType,
-        );
+        const embedding = await generateEmbedding(chunks[i], 'RETRIEVAL_DOCUMENT' as TaskType);
         await DocumentChunk.create({
           resourceId: resource._id,
           chunkIndex: i,

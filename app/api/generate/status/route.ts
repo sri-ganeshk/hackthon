@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { chapterQueue, flashcardQueue, audioQueue } from '@/lib/queue/index';
+import { getChapterQueue, getFlashcardQueue, getAudioQueue } from '@/lib/queue/index';
 import { logger } from '@/lib/logger';
 
 /** GET /api/generate/status?jobId=<id>&type=<chapter|flashcards|audio> */
@@ -19,13 +19,13 @@ export async function GET(request: NextRequest) {
     let queue;
     switch (type) {
       case 'chapter':
-        queue = chapterQueue;
+        queue = getChapterQueue();
         break;
       case 'flashcards':
-        queue = flashcardQueue;
+        queue = getFlashcardQueue();
         break;
       case 'audio':
-        queue = audioQueue;
+        queue = getAudioQueue();
         break;
       default:
         return NextResponse.json(
@@ -36,10 +36,7 @@ export async function GET(request: NextRequest) {
 
     const job = await queue.getJob(jobId);
     if (!job) {
-      return NextResponse.json(
-        { success: false, error: 'Job not found' },
-        { status: 404 },
-      );
+      return NextResponse.json({ success: false, error: 'Job not found' }, { status: 404 });
     }
 
     const state = await job.getState();

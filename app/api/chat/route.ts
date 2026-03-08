@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     };
 
     let systemPrompt =
-      'You are a helpful study assistant. Answer the user\'s questions clearly and concisely. When context is provided, base your answers on it and cite your sources.';
+      "You are a helpful study assistant. Answer the user's questions clearly and concisely. When context is provided, base your answers on it and cite your sources.";
 
     let sources: Array<{ chunkIndex: number; text: string }> = [];
 
@@ -21,17 +21,11 @@ export async function POST(req: Request) {
       const lastUserMessage = messages.filter((m) => m.role === 'user').pop();
       if (lastUserMessage) {
         try {
-          const chunks = await retrieveRelevantChunks(
-            lastUserMessage.content,
-            resourceId,
-            5,
-          );
+          const chunks = await retrieveRelevantChunks(lastUserMessage.content, resourceId, 5);
           sources = chunks.map((c) => ({ chunkIndex: c.chunkIndex, text: c.text }));
 
           if (chunks.length > 0) {
-            const context = chunks
-              .map((c, i) => `[Source ${i + 1}]: ${c.text}`)
-              .join('\n\n');
+            const context = chunks.map((c, i) => `[Source ${i + 1}]: ${c.text}`).join('\n\n');
             systemPrompt += `\n\nRelevant context from the document:\n${context}`;
           }
         } catch (ragErr) {
@@ -49,7 +43,7 @@ export async function POST(req: Request) {
       })),
     });
 
-    return result.toDataStreamResponse({
+    return result.toTextStreamResponse({
       headers: {
         'X-Sources': JSON.stringify(sources),
       },

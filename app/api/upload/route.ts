@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { connectDB } from '@/lib/db/mongodb';
 import { getSupabaseStorage } from '@/lib/supabase/storage';
 import Resource from '@/models/Resource';
-import { pdfQueue } from '@/lib/queue/index';
+import { getPdfQueue } from '@/lib/queue/index';
 import { logger } from '@/lib/logger';
 
 /** POST /api/upload - Upload PDF for RAG processing */
@@ -13,10 +13,7 @@ export async function POST(req: NextRequest) {
     const userId = (formData.get('userId') as string) ?? 'anonymous';
 
     if (!file) {
-      return NextResponse.json(
-        { success: false, error: 'No file provided' },
-        { status: 400 },
-      );
+      return NextResponse.json({ success: false, error: 'No file provided' }, { status: 400 });
     }
 
     const supabase = getSupabaseStorage();
@@ -29,15 +26,10 @@ export async function POST(req: NextRequest) {
 
     if (uploadError) {
       logger.error({ error: uploadError }, 'Failed to upload to Supabase');
-      return NextResponse.json(
-        { success: false, error: 'Failed to upload file' },
-        { status: 500 },
-      );
+      return NextResponse.json({ success: false, error: 'Failed to upload file' }, { status: 500 });
     }
 
-    const { data: urlData } = supabase.storage
-      .from('documents')
-      .getPublicUrl(fileName);
+    const { data: urlData } = supabase.storage.from('documents').getPublicUrl(fileName);
     const url = urlData?.publicUrl ?? '';
 
     await connectDB();
@@ -48,7 +40,7 @@ export async function POST(req: NextRequest) {
       status: 'processing',
     });
 
-    await pdfQueue.add('process-pdf-for-rag', {
+    await getPdfQueue().add('process-pdf-for-rag', {
       resourceId: resource._id.toString(),
       url,
     });
