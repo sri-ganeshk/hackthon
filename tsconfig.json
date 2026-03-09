@@ -23,21 +23,16 @@
       }
     ],
     "paths": {
-      "@/": [
-        "./"
+      "@/*": [
+        "./*"
       ]
     }
   },
   "include": [
-    ".next/types//*.ts",
-    "/.ts",
-    "/.tsx",
-    "app/api/sound-generater/route.js",
-    "app/course/page.jsx",
-    "app/lib/prisma.js",
-    "app/upload/page.jsx",
-    "next-env.d.ts",
-    ".next/types/**/*.ts"
+    ".next/types/**/*.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "next-env.d.ts"
   ],
   "exclude": [
     "node_modules"
